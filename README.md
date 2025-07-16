@@ -46,42 +46,6 @@ fairdom-seek-docker/
 └── backups/                # Database backups
 ```
 
-## Usage
-
-### Starting Services
-```bash
-docker compose up -d
-```
-
-### Stopping Services
-```bash
-docker compose down
-```
-
-### Viewing Logs
-```bash
-# All services
-docker compose logs
-
-# Specific service
-docker compose logs seek
-docker compose logs -f seek  # Follow logs
-```
-
-### Database Access
-```bash
-# MySQL command line
-docker compose exec db mysql -u seek_user -pseek_password seek_production
-
-# Database backup
-docker compose exec db mysqldump -u root -pseek_root_password seek_production > backup.sql
-```
-
-### Rails Console
-```bash
-docker compose exec seek bundle exec rails console
-```
-
 ## Configuration
 
 ### Environment Variables
@@ -92,41 +56,6 @@ Key settings in `docker-compose.yml`:
 
 ### Custom Configuration
 Place custom Ruby configuration files in `seek-config/` directory.
-
-### Email Configuration
-Update email settings in `docker-compose.yml` under the `seek` service environment section.
-
-## Troubleshooting
-
-### Services Won't Start
-```bash
-# Check service status
-docker compose ps
-
-# View specific service logs
-docker compose logs seek
-
-# Restart services
-docker compose restart
-```
-
-### Database Issues
-```bash
-# Reset database
-docker compose down
-docker volume rm fairdom-seek-docker_mysql_data
-./complete_setup.sh
-```
-
-### Permission Issues
-```bash
-# Fix file permissions
-sudo chown -R $USER:$USER .
-```
-
-### Memory Issues
-- Increase Docker memory limit to at least 4GB
-- Monitor resource usage: `docker stats`
 
 ## Development
 
@@ -161,16 +90,6 @@ docker compose exec db mysqldump -u root -pseek_root_password seek_production > 
 docker compose exec -T db mysql -u root -pseek_root_password seek_production < backup_20250716.sql
 ```
 
-## Security Notes
-
-### For Production Use:
-1. Change default passwords in `docker-compose.yml`
-2. Use strong secret keys (update .env file)
-3. Enable SSL/HTTPS
-4. Restrict database access
-5. Regular security updates
-6. Backup encryption
-
 ## Default Login Credentials
 
 After setup completion, login to SEEK with:
@@ -187,18 +106,3 @@ After setup completion, login to SEEK with:
 - **Root DB:** root / seek_root_password
 
 **Change these for production use!**
-
-## Support
-
-- SEEK Documentation: https://seek4science.org/
-- GitHub Issues: https://github.com/seek4science/seek
-- Docker Issues: Check container logs and resource allocation
-
-## Version Information
-
-- SEEK Version: v1.16.2
-- Ruby Version: 3.1.7
-- Rails Version: 6.1.7.10
-- MySQL Version: 8.0
-- Ubuntu Version: 22.04 LTS
-

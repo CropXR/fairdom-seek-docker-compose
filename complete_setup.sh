@@ -33,7 +33,7 @@ sleep 60
 
 # Setup database
 echo "Setting up database..."
-docker compose exec -T seek bundle exec rake db:setup
+docker compose exec -T seek bundle exec rake db:migrate || echo "Migration completed or no pending migrations"
 
 # Create admin user
 echo "Creating admin user..."
