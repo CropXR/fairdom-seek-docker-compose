@@ -1,0 +1,103 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: seek_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: seek_root_password
+      MYSQL_DATABASE: seek_production
+      MYSQL_USER: seek_user
+      MYSQL_PASSWORD: seek_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - seek_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: seek_redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - seek_network
+
+  seek:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: seek_app
+    depends_on:
+      - db
+      - redis
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_NAME: seek_production
+      DATABASE_USERNAME: seek_user
+      DATABASE_PASSWORD: seek_password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RAILS_ENV: production
+      SECRET_KEY_BASE: cf2f54809ca766cce6fa6dcb4b1478ea470f21cec90d92553a284c93b2bac9070e009fe7a912033850716aa0cd0f930d73334e093eb99c26c69fc7577f248256
+      SEEK_RELATIVE_URL_ROOT: ""
+      SEEK_HOST: localhost
+      SEEK_PORT: 3000
+      SEEK_PROTOCOL: http
+      FILESTORE_PATH: /seek/filestore
+      JAVA_OPTS: -Xmx2g
+    volumes:
+      - seek_data:/seek/filestore
+      - seek_logs:/seek/log
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - seek_network
+
+  seek_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: seek_worker
+    depends_on:
+      - db
+      - redis
+      - seek
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_NAME: seek_production
+      DATABASE_USERNAME: seek_user
+      DATABASE_PASSWORD: seek_password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RAILS_ENV: production
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    volumes:
+      - seek_data:/seek/filestore
+      - seek_logs:/seek/log
+    command: /seek/worker.sh
+    restart: unless-stopped
+    networks:
+      - seek_network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  seek_data:
+    driver: local
+  seek_logs:
+    driver: local
+
+networks:
+  seek_network:
+    driver: bridge

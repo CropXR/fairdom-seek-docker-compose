@@ -1,0 +1,24 @@
+default: &default
+  adapter: mysql2
+  encoding: utf8mb4
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: <%= ENV.fetch("DATABASE_USERNAME") { "seek_user" } %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD") { "seek_password" } %>
+  host: <%= ENV.fetch("DATABASE_HOST") { "db" } %>
+  port: <%= ENV.fetch("DATABASE_PORT") { 3306 } %>
+  database: <%= ENV.fetch("DATABASE_NAME") { "seek_development" } %>
+  socket: <%= ENV.fetch("DATABASE_SOCKET") { nil } %>
+  reconnect: true
+  charset: utf8mb4
+  collation: utf8mb4_unicode_ci
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  database: seek_test
+
+production:
+  <<: *default
+  database: seek_production
